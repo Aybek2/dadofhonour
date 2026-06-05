@@ -35,6 +35,17 @@ export function PendingClient() {
     }
   }, [sessionId, router]);
 
+  // Fire once on mount — this page only loads after successful Stripe payment
+  useEffect(() => {
+    if (sessionId && typeof window !== "undefined" && (window as any).gtag) {
+      (window as any).gtag("event", "conversion", {
+        send_to: "AW-18216944551/DdYwCMSGx7kcEKeHwu5D",
+        transaction_id: sessionId,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     // Check immediately
     checkStatus();
