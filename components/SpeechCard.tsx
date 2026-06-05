@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import type { Archetype } from "@/lib/types";
+import type { Archetype, Generation } from "@/lib/types";
 
 const ARCHETYPE_LABELS: Record<Archetype, string> = {
   traditionalist: "The Proud Traditionalist",
@@ -13,23 +13,27 @@ const ARCHETYPE_LABELS: Record<Archetype, string> = {
 
 interface SpeechCardProps {
   archetype: Archetype;
-  initialOutput: string;
+  versions: Generation[];
   token: string;
   regens_remaining: number;
 }
 
 export function SpeechCard({
   archetype,
-  initialOutput,
+  versions: initialVersions,
   token,
   regens_remaining,
 }: SpeechCardProps) {
-  const [output, setOutput] = useState(initialOutput);
+  const [versions, setVersions] = useState(initialVersions);
+  const [versionIndex, setVersionIndex] = useState(0);
   const [remaining, setRemaining] = useState(regens_remaining);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedback, setFeedback] = useState("");
+
+  const currentOutput = versions[versionIndex]?.output ?? "";
+  const totalVersions = versions.length;
 
   const handleRegenClick = () => {
     setShowFeedback(true);
@@ -54,7 +58,7 @@ export function SpeechCard({
           token,
           archetype,
           feedback: feedback.trim() || undefined,
-          previousOutput: output,
+          previousOutput: versions[0].output,
         }),
       });
       if (!res.ok) {
@@ -64,7 +68,14 @@ export function SpeechCard({
         );
       }
       const data = (await res.json()) as { output: string };
-      setOutput(data.output);
+      const newVersion: Generation = {
+        id: Date.now().toString(),
+        archetype,
+        output: data.output,
+        created_at: new Date().toISOString(),
+      };
+      setVersions((prev) => [newVersion, ...prev]);
+      setVersionIndex(0);
       setRemaining((r) => r - 1);
       setShowFeedback(false);
       setFeedback("");
@@ -89,9 +100,38 @@ export function SpeechCard({
         </div>
       </div>
 
+      {/* Version navigation — only shown when multiple versions exist */}
+      {totalVersions > 1 && (
+        <div className="flex items-center gap-3 py-1 border-t border-border">
+          <button
+            type="button"
+            onClick={() => setVersionIndex((i) => i + 1)}
+            disabled={versionIndex >= totalVersions - 1}
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            ← Older
+          </button>
+          <span className="flex-1 text-center text-xs text-muted-foreground">
+            {versionIndex === 0
+              ? `Version ${totalVersions} of ${totalVersions} — current`
+              : versionIndex === totalVersions - 1
+              ? `Version 1 of ${totalVersions} — original`
+              : `Version ${totalVersions - versionIndex} of ${totalVersions}`}
+          </span>
+          <button
+            type="button"
+            onClick={() => setVersionIndex((i) => i - 1)}
+            disabled={versionIndex === 0}
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            Newer →
+          </button>
+        </div>
+      )}
+
       {/* Speech text */}
       <div className="text-sm leading-relaxed whitespace-pre-wrap font-serif text-foreground">
-        {output}
+        {currentOutput}
       </div>
 
       {error && (
@@ -100,16 +140,17 @@ export function SpeechCard({
         </p>
       )}
 
-      {/* Regen UI */}
-      {remaining > 0 && (
-        showFeedback ? (
+      {/* Regen UI — always based on the most recent version */}
+      {remaining > 0 &&
+        (showFeedback ? (
           <div className="space-y-3 pt-1">
             <div>
               <label className="block text-sm font-medium text-foreground mb-1.5">
                 What would you like changed?
               </label>
               <p className="text-xs text-muted-foreground mb-2">
-                Tell us what worked, what didn&apos;t, or what direction to take it in. Or leave blank to generate a fresh version.
+                Tell us what worked, what didn&apos;t, or what direction to take
+                it in. Or leave blank to generate a fresh version.
               </p>
               <textarea
                 value={feedback}
@@ -156,8 +197,7 @@ export function SpeechCard({
           >
             Regenerate this draft
           </button>
-        )
-      )}
+        ))}
 
       {remaining <= 0 && (
         <p className="text-center text-sm text-muted-foreground py-2">

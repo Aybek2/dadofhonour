@@ -91,16 +91,24 @@ export default async function OutputPage({
   const submission = submissionResult[0] as Submission | undefined;
   const fatherName = submission?.answers?.father_name ?? "there";
 
-  // Load most recent generation per archetype
+  // Load ALL generations per archetype, newest first
   const generationsResult = await sql`
-    SELECT DISTINCT ON (archetype) id, archetype, output, created_at
+    SELECT id, archetype, output, created_at
     FROM generations
     WHERE submission_id = (
       SELECT id FROM submissions WHERE order_id = ${orderId}
     )
     ORDER BY archetype, created_at DESC
   `;
-  const generations = generationsResult as Generation[];
+  const allGenerations = generationsResult as Generation[];
+
+  // Group by archetype (already sorted newest-first per archetype)
+  const byArchetype = new Map<Archetype, Generation[]>();
+  for (const g of allGenerations) {
+    const key = g.archetype as Archetype;
+    if (!byArchetype.has(key)) byArchetype.set(key, []);
+    byArchetype.get(key)!.push(g);
+  }
 
   const archetypeOrder: Archetype[] = [
     "traditionalist",
@@ -108,11 +116,6 @@ export default async function OutputPage({
     "warm-wit",
     "heart-on-sleeve",
   ];
-
-  const sortedGenerations = [...generations].sort(
-    (a, b) =>
-      archetypeOrder.indexOf(a.archetype) - archetypeOrder.indexOf(b.archetype)
-  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -134,15 +137,19 @@ export default async function OutputPage({
 
         {/* Speech cards */}
         <div className="space-y-6">
-          {sortedGenerations.map((g) => (
-            <SpeechCard
-              key={g.archetype}
-              archetype={g.archetype}
-              initialOutput={g.output}
-              token={token}
-              regens_remaining={order.regens_remaining}
-            />
-          ))}
+          {archetypeOrder.map((archetype) => {
+            const versions = byArchetype.get(archetype) ?? [];
+            if (versions.length === 0) return null;
+            return (
+              <SpeechCard
+                key={archetype}
+                archetype={archetype}
+                versions={versions}
+                token={token}
+                regens_remaining={order.regens_remaining}
+              />
+            );
+          })}
         </div>
 
         {/* Footer */}
