@@ -31,3 +31,55 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Reviews marquee — slow right-to-left seamless scroll.
+   Two copies of the list animate 0 → -50% so the loop has no seam. */
+@keyframes marquee-rtl {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee-rtl 90s linear infinite;
+  will-change: transform;
+}
+
+/* Pause when the reader hovers anywhere over the strip. */
+.marquee-track:hover .animate-marquee {
+  animation-play-state: paused;
+}
+
+/* Soft fade at both edges so cards ease in/out rather than clipping. */
+.marquee-track {
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 8%,
+    #000 92%,
+    transparent
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 8%,
+    #000 92%,
+    transparent
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee {
+    animation: none;
+  }
+  /* Without motion, fall back to a normal horizontal scroll of one copy. */
+  .marquee-track {
+    overflow-x: auto;
+  }
+  .marquee-track [aria-hidden="true"].animate-marquee {
+    display: none;
+  }
+}

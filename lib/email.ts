@@ -51,3 +51,73 @@ export async function sendSpeeches(
     `,
   });
 }
+
+// Escape user-supplied text before interpolating it into the email HTML.
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+/**
+ * "Gift nudge" email — sent by a daughter/relative to the father-of-the-bride,
+ * letting him know about the service. Built to be opened and clicked: warm
+ * subject in the sender's name, one clear job, the key facts, one CTA.
+ */
+export async function sendGiftEmail(senderName: string, recipientEmail: string) {
+  const sender = escapeHtml(senderName.trim());
+  const base = process.env.NEXT_PUBLIC_BASE_URL;
+
+  await resend.emails.send({
+    from: process.env.RESEND_FROM_EMAIL!,
+    to: recipientEmail,
+    replyTo: "support@dadofhonour.co.uk",
+    subject: `${sender} thought this might help with your speech`,
+    html: `
+      <div style="font-family:Georgia,serif;max-width:600px;margin:0 auto;padding:32px 24px;color:#171717;">
+        <p style="font-size:16px;line-height:1.6;margin:0 0 16px;">Hi,</p>
+        <p style="font-size:16px;line-height:1.6;margin:0 0 16px;">
+          <strong>${sender}</strong> thought you might find this useful for your
+          father-of-the-bride speech.
+        </p>
+        <p style="font-size:16px;line-height:1.6;margin:0 0 16px;">
+          It&apos;s a simple thing called <strong>Dad of Honour</strong>. You answer a
+          dozen short questions about your daughter &mdash; a memory or two, what you
+          admire about her partner, how you&apos;d like it to feel &mdash; and it writes
+          you <strong>four complete speeches</strong>, each in a different voice, all
+          built entirely from your own stories. They land in your inbox within minutes.
+        </p>
+
+        <table role="presentation" cellpadding="0" cellspacing="0" style="margin:8px 0 24px;">
+          <tr><td style="font-size:15px;line-height:1.9;color:#171717;">
+            &bull;&nbsp; Four drafts to choose from &mdash; keep the one that sounds like you<br/>
+            &bull;&nbsp; Free regenerations &mdash; tell it what to change and it rewrites<br/>
+            &bull;&nbsp; Ready in minutes, not days<br/>
+            &bull;&nbsp; £29 one-off &mdash; with a money-back guarantee
+          </td></tr>
+        </table>
+
+        <p style="margin:0 0 28px;">
+          <a href="${base}/?utm_source=gift&utm_medium=email"
+             style="background:#171717;color:#fff;padding:14px 28px;text-decoration:none;border-radius:6px;font-size:16px;display:inline-block;">
+            Take a look &rarr;
+          </a>
+        </p>
+
+        <p style="font-size:15px;line-height:1.6;margin:0 0 16px;color:#444;">
+          No pressure and nothing to set up &mdash; have a read in your own time. The
+          hardest part of the speech is the blank page, and this gets you past it.
+        </p>
+        <hr style="margin:28px 0;border:none;border-top:1px solid #e5e5e5;"/>
+        <p style="font-size:13px;color:#737373;line-height:1.6;margin:0;">
+          ${sender} asked us to send this one email to you via DadOfHonour.co.uk.
+          We won&apos;t email you again or share your address. Questions? Just reply to
+          this message.
+        </p>
+      </div>
+    `,
+  });
+}

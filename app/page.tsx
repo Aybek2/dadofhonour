@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { cn } from "@/lib/utils";
+import { GiftCta } from "@/components/GiftCta";
+import { ReviewsMarquee, FeaturedReviews } from "@/components/Reviews";
 
 const SAMPLE_SPEECHES = [
   {
@@ -115,10 +116,11 @@ export default function HomePage() {
           Delivered by email within minutes. 20 free regenerations included.
           Money-back guarantee.
         </p>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Buying this as a gift for your dad? Fill the form on his behalf — speeches deliver to whichever email you choose.
-        </p>
+        <GiftCta />
       </section>
+
+      {/* Google reviews — right-to-left marquee */}
+      <ReviewsMarquee />
 
       {/* How it works */}
       <section className="border-t border-border bg-muted">
@@ -159,6 +161,9 @@ export default function HomePage() {
           ))}
         </div>
       </section>
+
+      {/* Featured reviews — the "what if I hate it?" answer, at the decision point */}
+      <FeaturedReviews />
 
       {/* Pricing */}
       <section className="border-t border-border bg-muted">
