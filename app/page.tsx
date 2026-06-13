@@ -119,7 +119,7 @@ export default function HomePage() {
         <GiftCta />
       </section>
 
-      {/* Google reviews — right-to-left marquee */}
+      {/* Customer reviews — right-to-left marquee */}
       <ReviewsMarquee />
 
       {/* How it works */}

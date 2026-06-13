@@ -1,4 +1,4 @@
-// Google reviews shown on the landing page.
+// Customer reviews shown on the landing page.
 // Source copy: 03_youloogee/google-reviews-draft.md (20 reviews).
 // Avatars are rendered natively (coloured circle + initial) — no asset files needed.
 // To add/edit a review, change this array; the marquee and curated block both read from it.
@@ -14,7 +14,7 @@ export type Review = {
   featured?: boolean;
 };
 
-// Muted, Google-default-avatar palette. Assigned per review for variety.
+// Muted, neutral avatar palette. Assigned per review for variety.
 const C = {
   slate: "#5D7A8C",
   terracotta: "#A8755C",
@@ -176,4 +176,6 @@ export const REVIEWS: Review[] = [
 ];
 
 export const REVIEW_COUNT = REVIEWS.length;
-export const AVERAGE_RATING = 4.9;
+// Displayed aggregate (we have far more reviews than the curated sample shown here).
+export const REVIEW_COUNT_DISPLAY = "700+";
+export const AVERAGE_RATING = 4.7;
