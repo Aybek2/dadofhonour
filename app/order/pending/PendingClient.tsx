@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useCallback, useRef } from "react";
+import { useEffect, useCallback, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { OrderStatus } from "@/lib/types";
 
@@ -14,6 +14,7 @@ export function PendingClient() {
   const router = useRouter();
   const sessionId = searchParams.get("session_id");
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [failed, setFailed] = useState(false);
 
   const checkStatus = useCallback(async () => {
     if (!sessionId) return;
@@ -28,7 +29,7 @@ export function PendingClient() {
         router.replace(`/order/${data.token}`);
       } else if (data.status === "failed") {
         if (intervalRef.current) clearInterval(intervalRef.current);
-        // Stay on page — show error
+        setFailed(true);
       }
     } catch {
       // Keep polling
@@ -74,15 +75,38 @@ export function PendingClient() {
     );
   }
 
+  if (failed) {
+    return (
+      <div className="max-w-md w-full text-center">
+        <h1 className="text-2xl font-semibold mb-3">
+          Something went wrong on our side
+        </h1>
+        <p className="text-muted-foreground mb-4">
+          Your payment went through, but we hit a problem preparing your
+          speeches. We&apos;re on it — email{" "}
+          <a
+            href="mailto:support@dadofhonour.co.uk"
+            className="underline underline-offset-2"
+          >
+            support@dadofhonour.co.uk
+          </a>{" "}
+          and we&apos;ll sort it out straight away, or refund you in full.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-md w-full text-center">
       <div className="mb-6 flex justify-center">
         <div className="h-10 w-10 border-4 border-border border-t-foreground rounded-full animate-spin" />
       </div>
-      <h1 className="text-2xl font-semibold mb-3">Writing your speeches…</h1>
+      <h1 className="text-2xl font-semibold mb-3">
+        Unlocking your speeches…
+      </h1>
       <p className="text-muted-foreground mb-4">
-        This usually takes about a minute. We&apos;ll take you straight there
-        when they&apos;re ready.
+        Payment received. This takes about a minute — we&apos;ll take you
+        straight there when they&apos;re ready.
       </p>
       <p className="text-sm text-muted-foreground">
         We&apos;ll also send them to your email so you have a link to come back

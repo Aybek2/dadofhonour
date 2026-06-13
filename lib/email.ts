@@ -42,7 +42,7 @@ export async function sendSpeeches(
         <p style="margin:32px 0;">
           <a href="${link}" style="background:#171717;color:#fff;padding:12px 24px;text-decoration:none;border-radius:6px;font-size:15px;">View your speeches &rarr;</a>
         </p>
-        <p style="font-size:13px;color:#737373;">You have 5 free regenerations &mdash; if any draft isn&apos;t quite right, you can regenerate it from your personal page.</p>
+        <p style="font-size:13px;color:#737373;">You have 20 free regenerations &mdash; if any draft isn&apos;t quite right, you can regenerate it from your personal page.</p>
         <hr style="margin:32px 0;border:none;border-top:1px solid #e5e5e5;"/>
         ${speechesHtml}
         <hr style="margin:32px 0;border:none;border-top:1px solid #e5e5e5;"/>

@@ -47,6 +47,219 @@ const FIELD_LABELS: Record<string, string> = {
   partner_timeline: "How long they've been together",
 };
 
+const GEN_STAGES = [
+  { message: "Reading your answers…", duration: 2000 },
+  { message: "Writing The Proud Traditionalist…", duration: 2600 },
+  { message: "Writing The Quiet Storyteller…", duration: 2600 },
+  { message: "Writing The Warm Wit…", duration: 2600 },
+  { message: "Writing The Heart-on-Sleeve…", duration: 2600 },
+  { message: "Checking every line against what you told us…", duration: 1800 },
+];
+
+const ARCHETYPES = [
+  {
+    name: "The Proud Traditionalist",
+    description:
+      "Warm, classic, gently funny — the speech everyone expects, done properly.",
+  },
+  {
+    name: "The Quiet Storyteller",
+    description:
+      "Built around one memory of her, told the way you'd actually tell it.",
+  },
+  {
+    name: "The Warm Wit",
+    description: "Dry, genuinely funny, and warmer than it lets on.",
+  },
+  {
+    name: "The Heart-on-Sleeve",
+    description: "For the dad who wants to say all of it, out loud, on the day.",
+  },
+];
+
+function GeneratingScreen({
+  stage,
+  daughterName,
+}: {
+  stage: number;
+  daughterName: string;
+}) {
+  const total = GEN_STAGES.reduce((sum, s) => sum + s.duration, 0);
+  const elapsed = GEN_STAGES.slice(0, stage + 1).reduce(
+    (sum, s) => sum + s.duration,
+    0
+  );
+  const progress = Math.min((elapsed / total) * 100, 100);
+  const current = GEN_STAGES[Math.min(stage, GEN_STAGES.length - 1)];
+
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center px-4">
+      <div className="w-full max-w-md text-center">
+        <span className="mx-auto mb-8 block h-8 w-8 border-2 border-border border-t-foreground rounded-full animate-spin" />
+        <h1 className="text-2xl font-semibold tracking-tight mb-2">
+          Writing your four speeches…
+        </h1>
+        <p className="text-muted-foreground mb-10">
+          {"Four different voices, all built from what you told us about "}
+          {daughterName}.
+        </p>
+        <div className="h-1 bg-border rounded-full overflow-hidden mb-4">
+          <div
+            className="h-full bg-foreground rounded-full transition-all duration-1000 ease-linear"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+        <p className="text-sm text-muted-foreground" aria-live="polite">
+          {current.message}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function PaymentWall({
+  fatherName,
+  daughterName,
+  ready,
+  error,
+  onUnlock,
+  onRetry,
+  onBack,
+}: {
+  fatherName: string;
+  daughterName: string;
+  ready: boolean;
+  error: string | null;
+  onUnlock: () => void;
+  onRetry: () => void;
+  onBack: () => void;
+}) {
+  const firstName = fatherName.trim().split(/\s+/)[0] || "there";
+
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="mx-auto max-w-xl px-4 py-12">
+        <div className="text-center mb-10">
+          <div className="mx-auto mb-6 flex h-12 w-12 items-center justify-center rounded-full bg-foreground">
+            <svg
+              className="h-6 w-6 text-background"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M20 6L9 17l-5-5" />
+            </svg>
+          </div>
+          <h1 className="text-2xl font-semibold tracking-tight mb-2">
+            {"Your four speeches are ready, "}
+            {firstName}.
+          </h1>
+          <p className="text-muted-foreground">
+            {"Four complete drafts, each built from what you told us about "}
+            {daughterName}
+            {". Unlock them to read all four."}
+          </p>
+        </div>
+
+        <div className="space-y-3 mb-8">
+          {ARCHETYPES.map((a) => (
+            <div
+              key={a.name}
+              className="flex items-start gap-3 rounded-md border border-border p-4"
+            >
+              <svg
+                className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <rect x="4" y="11" width="16" height="10" rx="2" />
+                <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+              </svg>
+              <div>
+                <p className="text-sm font-medium">{a.name}</p>
+                <p className="text-sm text-muted-foreground">{a.description}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="rounded-md bg-muted p-5 mb-6">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-sm font-medium">All four speeches</span>
+            <span className="text-lg font-semibold">£29</span>
+          </div>
+          <p className="text-xs text-muted-foreground mb-4">
+            One payment. All four drafts delivered to your inbox in minutes,
+            plus a private link to read and refine them online.
+          </p>
+          {error ? (
+            <>
+              <p className="mb-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2">
+                {error}
+              </p>
+              <button
+                type="button"
+                onClick={onRetry}
+                className="w-full rounded-md bg-foreground text-background py-3 text-sm font-medium hover:bg-neutral-800 transition-colors"
+              >
+                Try again
+              </button>
+            </>
+          ) : (
+            <button
+              type="button"
+              onClick={onUnlock}
+              disabled={!ready}
+              className="w-full rounded-md bg-foreground text-background py-3 text-sm font-medium hover:bg-neutral-800 transition-colors disabled:opacity-70 flex items-center justify-center gap-2"
+            >
+              {ready ? (
+                "Unlock all four — £29 →"
+              ) : (
+                <>
+                  <span className="inline-block h-4 w-4 border-2 border-background/30 border-t-background rounded-full animate-spin" />
+                  Preparing secure checkout…
+                </>
+              )}
+            </button>
+          )}
+        </div>
+
+        <div className="rounded-md border border-border p-4 mb-8">
+          <p className="text-sm font-medium mb-1">Money-back guarantee</p>
+          <p className="text-sm text-muted-foreground">
+            If none of the four drafts feels like something you could stand up
+            and say, reply to your delivery email and we&apos;ll refund you in
+            full.
+          </p>
+        </div>
+
+        <p className="text-center text-xs text-muted-foreground mb-6">
+          Secure payment via Stripe. No card details stored.
+        </p>
+
+        <div className="text-center">
+          <button
+            type="button"
+            onClick={onBack}
+            className="text-sm text-muted-foreground underline underline-offset-2 hover:text-foreground transition-colors"
+          >
+            ← Go back and edit my answers
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function ProgressBar({ step }: { step: number }) {
   return (
     <div className="mb-8">
@@ -185,7 +398,9 @@ function SkippedBadge({ onUnskip }: { onUnskip: () => void }) {
 
 export default function OrderPage() {
   const [step, setStep] = useState(1);
-  const [submitting, setSubmitting] = useState(false);
+  const [phase, setPhase] = useState<"form" | "generating" | "wall">("form");
+  const [genStage, setGenStage] = useState(0);
+  const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [skippedFields, setSkippedFields] = useState<Set<string>>(new Set());
   const [unansweredError, setUnansweredError] = useState(false);
@@ -247,12 +462,29 @@ export default function OrderPage() {
     let fieldsToValidate: (keyof FullFormData)[] = [];
 
     if (step === 1)
-      fieldsToValidate = ["father_name", "daughter_name", "partner_name"];
+      fieldsToValidate = [
+        "father_name",
+        "daughter_name",
+        "partner_name",
+        "email",
+      ];
     if (step === 2) fieldsToValidate = ["tone", "length"];
-    if (step === 6) fieldsToValidate = ["email"];
 
     const valid = await trigger(fieldsToValidate);
     if (!valid) return;
+
+    // Capture the email as soon as step 1 completes, so abandoners are
+    // reachable. Fire-and-forget — never blocks the form.
+    if (step === 1) {
+      const email = getValues("email");
+      if (email) {
+        fetch("/api/lead", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        }).catch(() => {});
+      }
+    }
 
     const skippable = STEP_SKIPPABLE_FIELDS[step] ?? [];
     const values = getValues();
@@ -278,9 +510,11 @@ export default function OrderPage() {
     setStep((s) => Math.max(s - 1, 1));
   };
 
-  const onSubmit: SubmitHandler<FullFormData> = async (data) => {
-    setSubmitting(true);
+  // Create the Stripe session in the background while the generation screen
+  // plays, so the unlock button redirects instantly.
+  const startCheckout = useCallback(async (data: FullFormData) => {
     setSubmitError(null);
+    setCheckoutUrl(null);
     try {
       const res = await fetch("/api/checkout", {
         method: "POST",
@@ -295,16 +529,41 @@ export default function OrderPage() {
         );
       }
       const { url } = (await res.json()) as { url: string };
-      localStorage.removeItem(STORAGE_KEY);
-      window.location.href = url;
+      setCheckoutUrl(url);
     } catch (err) {
       setSubmitError(
         err instanceof Error
           ? err.message
           : "Something went wrong. Please try again."
       );
-      setSubmitting(false);
     }
+  }, []);
+
+  // Step through the staged generation messages, then show the payment wall
+  useEffect(() => {
+    if (phase !== "generating") return;
+    if (genStage >= GEN_STAGES.length) {
+      setPhase("wall");
+      return;
+    }
+    const t = setTimeout(
+      () => setGenStage((s) => s + 1),
+      GEN_STAGES[genStage].duration
+    );
+    return () => clearTimeout(t);
+  }, [phase, genStage]);
+
+  const onSubmit: SubmitHandler<FullFormData> = (data) => {
+    setGenStage(0);
+    setPhase("generating");
+    window.scrollTo({ top: 0 });
+    void startCheckout(data);
+  };
+
+  const handleUnlock = () => {
+    if (!checkoutUrl) return;
+    localStorage.removeItem(STORAGE_KEY);
+    window.location.href = checkoutUrl;
   };
 
   const skipField = (field: keyof FullFormData) => {
@@ -352,6 +611,24 @@ export default function OrderPage() {
       description: "Give it room to breathe",
     },
   ] as const;
+
+  if (phase === "generating") {
+    return <GeneratingScreen stage={genStage} daughterName={daughterName} />;
+  }
+
+  if (phase === "wall") {
+    return (
+      <PaymentWall
+        fatherName={watch("father_name") ?? ""}
+        daughterName={daughterName}
+        ready={checkoutUrl !== null}
+        error={submitError}
+        onUnlock={handleUnlock}
+        onRetry={() => void startCheckout(getValues())}
+        onBack={() => setPhase("form")}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -421,6 +698,31 @@ export default function OrderPage() {
                   {errors.partner_name && (
                     <p className="mt-1 text-sm text-red-600">
                       {errors.partner_name.message}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <FieldLabel
+                    required
+                    hint="We'll send the four finished speeches here."
+                  >
+                    Your email
+                  </FieldLabel>
+                  <TextInput
+                    type="email"
+                    placeholder="your@email.com"
+                    {...register("email", {
+                      required: "Please enter your email address.",
+                      pattern: {
+                        value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                        message: "Please enter a valid email address.",
+                      },
+                    })}
+                  />
+                  {errors.email && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {errors.email.message}
                     </p>
                   )}
                 </div>
@@ -1038,34 +1340,9 @@ export default function OrderPage() {
                 Almost there.
               </h1>
               <p className="text-muted-foreground mb-8">
-                Enter your email and review what you&apos;ve told us.
+                Have a quick look over what you&apos;ve told us — the speeches
+                are written from this.
               </p>
-
-              {/* Email */}
-              <div className="mb-8">
-                <FieldLabel
-                  required
-                  hint="We'll send your four speech drafts here. Valid for 7 days."
-                >
-                  Where should we send the speeches?
-                </FieldLabel>
-                <TextInput
-                  type="email"
-                  placeholder="your@email.com"
-                  {...register("email", {
-                    required: "Please enter your email address.",
-                    pattern: {
-                      value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                      message: "Please enter a valid email address.",
-                    },
-                  })}
-                />
-                {errors.email && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.email.message}
-                  </p>
-                )}
-              </div>
 
               {/* Review summary */}
               <div className="rounded-md border border-border p-4 space-y-3 mb-8">
@@ -1076,6 +1353,7 @@ export default function OrderPage() {
                   ["Father's name", getValues("father_name")],
                   ["Daughter's name", getValues("daughter_name")],
                   ["Partner's name", getValues("partner_name")],
+                  ["Email", getValues("email")],
                   ["Tone", getValues("tone")],
                   ["Length", getValues("length")],
                   ["Profession", getValues("profession")],
@@ -1109,8 +1387,8 @@ export default function OrderPage() {
                   <span className="text-sm font-semibold">£29</span>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Includes 5 free regenerations per archetype. Delivered by
-                  email within a few minutes.
+                  Includes 20 free regenerations — 5 per archetype. Delivered
+                  by email within a few minutes.
                 </p>
               </div>
 
@@ -1124,24 +1402,15 @@ export default function OrderPage() {
                 <button
                   type="button"
                   onClick={goBack}
-                  disabled={submitting}
-                  className="flex-1 rounded-md border border-border py-3 text-sm font-medium hover:bg-muted transition-colors disabled:opacity-50"
+                  className="flex-1 rounded-md border border-border py-3 text-sm font-medium hover:bg-muted transition-colors"
                 >
                   ← Back
                 </button>
                 <button
                   type="submit"
-                  disabled={submitting}
-                  className="flex-1 rounded-md bg-foreground text-background py-3 text-sm font-medium hover:bg-neutral-800 transition-colors disabled:opacity-70 flex items-center justify-center gap-2"
+                  className="flex-1 rounded-md bg-foreground text-background py-3 text-sm font-medium hover:bg-neutral-800 transition-colors"
                 >
-                  {submitting ? (
-                    <>
-                      <span className="inline-block h-4 w-4 border-2 border-background/30 border-t-background rounded-full animate-spin" />
-                      Processing…
-                    </>
-                  ) : (
-                    "Pay £29 →"
-                  )}
+                  Write my speeches →
                 </button>
               </div>
 

@@ -112,7 +112,11 @@ export default function HomePage() {
           </Link>
         </div>
         <p className="mt-4 text-sm text-muted-foreground">
-          Delivered by email within minutes. 5 free regenerations included.
+          Delivered by email within minutes. 20 free regenerations included.
+          Money-back guarantee.
+        </p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Buying this as a gift for your dad? Fill the form on his behalf — speeches deliver to whichever email you choose.
         </p>
       </section>
 
@@ -171,7 +175,7 @@ export default function HomePage() {
                 "Four complete speech drafts",
                 "Four distinct archetypes and voices",
                 "Built entirely from your answers — no generic filler",
-                "5 free regenerations (per archetype)",
+                "20 free regenerations (5 per archetype)",
                 "Delivered to your email within minutes",
                 "7-day access link to read and revisit",
               ].map((item) => (
@@ -187,15 +191,62 @@ export default function HomePage() {
             >
               Write my speech — £29 →
             </Link>
+            <p className="mt-3 text-sm text-muted-foreground">
+              Ordering for someone else? Enter their email in the form — or your own if you want to forward it on.
+            </p>
+            <div className="mt-8 rounded-lg border border-border bg-background p-5 text-left">
+              <p className="text-sm font-semibold mb-1">
+                Money-back guarantee
+              </p>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                If none of the four drafts feels like something you could stand
+                up and say, email us and we&apos;ll refund you in full. See our{" "}
+                <Link href="/refunds" className="underline underline-offset-2">
+                  refund policy
+                </Link>
+                .
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Footer */}
       <footer className="border-t border-border">
-        <div className="mx-auto max-w-4xl px-4 py-8 text-center">
+        <div className="mx-auto max-w-4xl px-4 py-8 text-center space-y-3">
           <p className="text-sm text-muted-foreground">
             DadOfHonour.co.uk &mdash; Father of the bride speech service
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Questions or refunds:{" "}
+            <a
+              href="mailto:support@dadofhonour.co.uk"
+              className="underline underline-offset-2 hover:text-foreground transition-colors"
+            >
+              support@dadofhonour.co.uk
+            </a>
+          </p>
+          <p className="text-sm text-muted-foreground">
+            <Link
+              href="/privacy"
+              className="underline underline-offset-2 hover:text-foreground transition-colors"
+            >
+              Privacy policy
+            </Link>
+            {" · "}
+            <Link
+              href="/terms"
+              className="underline underline-offset-2 hover:text-foreground transition-colors"
+            >
+              Terms
+            </Link>
+            {" · "}
+            <Link
+              href="/refunds"
+              className="underline underline-offset-2 hover:text-foreground transition-colors"
+            >
+              Refund policy
+            </Link>
           </p>
         </div>
       </footer>

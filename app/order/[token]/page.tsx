@@ -29,7 +29,14 @@ export default async function OutputPage({
           <h1 className="text-2xl font-semibold mb-3">This link has expired</h1>
           <p className="text-muted-foreground mb-6">
             Speech links are valid for 7 days. If you need access to your
-            speeches, please get in touch.
+            speeches, email{" "}
+            <a
+              href="mailto:support@dadofhonour.co.uk"
+              className="underline underline-offset-2"
+            >
+              support@dadofhonour.co.uk
+            </a>{" "}
+            and we&apos;ll send you a fresh link.
           </p>
           <a
             href="/"
