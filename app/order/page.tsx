@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { cn } from "@/lib/utils";
 import type { FormAnswers } from "@/lib/types";
+import { CompactReviews } from "@/components/Reviews";
 
 const STORAGE_KEY = "youloogee_form_state";
 const TOTAL_STEPS = 6;
@@ -232,6 +233,8 @@ function PaymentWall({
             </button>
           )}
         </div>
+
+        <CompactReviews />
 
         <div className="rounded-md border border-border p-4 mb-8">
           <p className="text-sm font-medium mb-1">Money-back guarantee</p>

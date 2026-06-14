@@ -88,6 +88,40 @@ export function ReviewsMarquee() {
 }
 
 /**
+ * Compact two-quote strip for the payment wall — the highest-intent moment, right
+ * before Stripe. Kept small so it reinforces trust without pushing the Unlock button
+ * down. Picks short quotes about relief / worth-it, which land hardest at the pay step.
+ */
+const COMPACT_IDS = [7, 14]; // Hannah ("worth every penny") · Martin (pre-wedding relief)
+
+export function CompactReviews() {
+  const picks = REVIEWS.filter((r) => COMPACT_IDS.includes(r.id));
+  return (
+    <div className="mb-6">
+      <div className="mb-3 flex items-center justify-center gap-2 text-sm">
+        <Stars className="text-sm" />
+        <span className="text-muted-foreground">
+          {AVERAGE_RATING} average · {REVIEW_COUNT_DISPLAY} reviews
+        </span>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2">
+        {picks.map((r) => (
+          <figure key={r.id} className="rounded-md border border-border p-4 text-left">
+            <Stars className="text-xs" />
+            <blockquote className="mt-1.5 text-sm leading-relaxed text-foreground">
+              {r.text}
+            </blockquote>
+            <figcaption className="mt-2 text-xs text-muted-foreground">
+              {r.name}, {r.location}
+            </figcaption>
+          </figure>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/**
  * The four ★ stories — each one is a "I didn't like the first draft, so I told it
  * what was wrong and it fixed it" account. Placed at the decision point because it
  * answers the buyer's biggest fear ("what if I hate it?") in the customers' own words.
