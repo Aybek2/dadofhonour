@@ -48,13 +48,17 @@ const FIELD_LABELS: Record<string, string> = {
   partner_timeline: "How long they've been together",
 };
 
+// Checklist steps for the generation screen. Durations are deliberately uneven —
+// reading is quick, drafting each speech takes longer and varies — so it reads as
+// real work rather than a scripted timer. Small per-run jitter is added when stepping.
 const GEN_STAGES = [
-  { message: "Reading your answers…", duration: 2000 },
-  { message: "Writing The Proud Traditionalist…", duration: 2600 },
-  { message: "Writing The Quiet Storyteller…", duration: 2600 },
-  { message: "Writing The Warm Wit…", duration: 2600 },
-  { message: "Writing The Heart-on-Sleeve…", duration: 2600 },
-  { message: "Checking every line against what you told us…", duration: 1800 },
+  { label: "Reading your answers", duration: 1400 },
+  { label: "Finding the thread in your story", duration: 1900 },
+  { label: "Drafting The Proud Traditionalist", duration: 2300 },
+  { label: "Drafting The Quiet Storyteller", duration: 2700 },
+  { label: "Drafting The Warm Wit", duration: 2000 },
+  { label: "Drafting The Heart-on-Sleeve", duration: 2500 },
+  { label: "Checking every line against what you told us", duration: 1800 },
 ];
 
 const ARCHETYPES = [
@@ -85,33 +89,73 @@ function GeneratingScreen({
   stage: number;
   daughterName: string;
 }) {
-  const total = GEN_STAGES.reduce((sum, s) => sum + s.duration, 0);
-  const elapsed = GEN_STAGES.slice(0, stage + 1).reduce(
-    (sum, s) => sum + s.duration,
-    0
-  );
-  const progress = Math.min((elapsed / total) * 100, 100);
   const current = GEN_STAGES[Math.min(stage, GEN_STAGES.length - 1)];
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
-      <div className="w-full max-w-md text-center">
-        <span className="mx-auto mb-8 block h-8 w-8 border-2 border-border border-t-foreground rounded-full animate-spin" />
-        <h1 className="text-2xl font-semibold tracking-tight mb-2">
-          Writing your four speeches…
-        </h1>
-        <p className="text-muted-foreground mb-10">
-          {"Four different voices, all built from what you told us about "}
-          {daughterName}.
-        </p>
-        <div className="h-1 bg-border rounded-full overflow-hidden mb-4">
-          <div
-            className="h-full bg-foreground rounded-full transition-all duration-1000 ease-linear"
-            style={{ width: `${progress}%` }}
-          />
+      <div className="w-full max-w-md">
+        <div className="mb-8 text-center">
+          <h1 className="text-2xl font-semibold tracking-tight mb-2">
+            Writing your four speeches…
+          </h1>
+          <p className="text-muted-foreground">
+            {"Four different voices, all built from what you told us about "}
+            {daughterName}.
+          </p>
         </div>
-        <p className="text-sm text-muted-foreground" aria-live="polite">
-          {current.message}
+
+        <ul className="space-y-1">
+          {GEN_STAGES.map((s, i) => {
+            const status =
+              i < stage ? "done" : i === stage ? "active" : "pending";
+            return (
+              <li
+                key={s.label}
+                aria-current={status === "active" ? "step" : undefined}
+                className={cn(
+                  "flex items-center gap-3 rounded-md px-3 py-2.5 transition-colors",
+                  status === "active" && "bg-muted"
+                )}
+              >
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center">
+                  {status === "done" ? (
+                    <span className="animate-check-pop flex h-5 w-5 items-center justify-center rounded-full bg-green-600">
+                      <svg
+                        className="h-3 w-3 text-white"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="3.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M20 6L9 17l-5-5" />
+                      </svg>
+                    </span>
+                  ) : status === "active" ? (
+                    <span className="h-5 w-5 rounded-full border-2 border-border border-t-foreground animate-spin" />
+                  ) : (
+                    <span className="h-[18px] w-[18px] rounded-full border-2 border-border" />
+                  )}
+                </span>
+                <span
+                  className={cn(
+                    "text-sm transition-colors duration-300",
+                    status === "done" && "text-foreground",
+                    status === "active" && "font-medium text-foreground",
+                    status === "pending" && "text-muted-foreground/50"
+                  )}
+                >
+                  {s.label}
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+
+        <p className="sr-only" aria-live="polite">
+          {current.label}
         </p>
       </div>
     </div>
@@ -549,9 +593,12 @@ export default function OrderPage() {
       setPhase("wall");
       return;
     }
+    // Add mild random jitter so the cadence differs run-to-run and never looks timed.
+    const base = GEN_STAGES[genStage].duration;
+    const jitter = Math.round((Math.random() - 0.4) * 700); // ~ -280..+420ms
     const t = setTimeout(
       () => setGenStage((s) => s + 1),
-      GEN_STAGES[genStage].duration
+      Math.max(700, base + jitter)
     );
     return () => clearTimeout(t);
   }, [phase, genStage]);
